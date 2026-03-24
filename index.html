@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GestScore</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+
+<style>
+:root{
+  --blue:#2563eb;
+  --light:#e0e7ff;
+  --bg:#f1f5f9;
+  --muted:#64748b;
+  --active:#dbeafe;
+}
+
+*{box-sizing:border-box;font-family:Inter,sans-serif;}
+body{margin:0;background:var(--bg);}
+
+header{
+  background:var(--blue);
+  color:white;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+h1{font-family:Poppins;margin:0;font-size:20px;}
+.menu-btn{font-size:22px;cursor:pointer;}
+
+/* MENU */
+.side-menu{
+  position:fixed;
+  top:0;
+  right:-100%;
+  width:260px;
+  height:100%;
+  background:white;
+  box-shadow:-5px 0 15px rgba(0,0,0,0.1);
+  padding:16px;
+  transition:0.3s;
+  z-index:1000;
+}
+.side-menu.open{right:0;}
+
+.close-btn{font-size:22px;cursor:pointer;text-align:right;}
+
+.menu-item{
+  margin-top:20px;
+  padding:10px;
+  border-radius:10px;
+  background:var(--light);
+}
+
+/* LAYOUT */
+.container{padding:16px;max-width:520px;margin:auto;}
+
+.card{
+  background:white;
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:16px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.tri-row{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+.tri.active{
+  background:var(--active);
+  border:2px solid var(--blue);
+}
+
+.center{
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* PILLS */
+.bar{
+  background:var(--light);
+  color:var(--blue);
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12.5px;
+  font-weight:500;
+  text-align:center;
+  margin-bottom:6px;
+}
+
+.row .bar{margin:auto;}
+
+.bar-line{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.sub{font-size:12px;color:var(--muted);}
+
+input{
+  width:100%;
+  border:none;
+  border-bottom:1px solid #ddd;
+  padding:6px 2px;
+  margin-top:6px;
+  font-size:14px;
+}
+
+.big{
+  font-size:28px;
+  font-weight:600;
+  text-align:center;
+  margin-top:12px;
+}
+
+.day{font-size:12px;color:var(--muted);}
+.date{font-size:15px;font-weight:500;}
+
+.range{font-size:13px;color:var(--muted);}
+
+.today-btn{
+  background:var(--light);
+  border:none;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>GestScore</h1>
+  <div class="menu-btn" onclick="menu.classList.add('open')">☰</div>
+</header>
+
+<!-- MENU -->
+<div class="side-menu" id="menu">
+  <div class="close-btn" onclick="menu.classList.remove('open')">✕</div>
+
+  <div class="menu-item">
+    <b>Disclaimer</b><br><br>
+    This tool is for educational purposes only and should not replace clinical judgment.
+  </div>
+
+  <div class="menu-item">
+    <b>About</b><br><br>
+    ©SGCC OFFICIAL
+  </div>
+</div>
+
+<div class="container">
+
+<!-- LMP + EDD -->
+<div class="row">
+  <div class="card">
+    <div class="bar">Last Menstrual Period</div>
+    <div class="sub">LMP</div>
+    <input type="date" id="lmp">
+  </div>
+
+  <div class="card">
+    <div class="bar">Estimated Delivery Date</div>
+    <div class="sub">EDD</div>
+    <input type="date" id="edd">
+  </div>
+</div>
+
+<!-- GA -->
+<div class="card">
+  <div class="bar-line">
+    <div>
+      <div class="bar">Gestational Age</div>
+      <div class="sub">Reference Date</div>
+    </div>
+    <div>
+      <input type="date" id="gaDate" style="width:120px">
+      <button class="today-btn" onclick="setToday()">Today</button>
+    </div>
+  </div>
+
+  <div class="big" id="ga">--</div>
+  <div class="sub" id="dayCount"></div>
+</div>
+
+<!-- TRIMESTERS -->
+<div class="tri-row">
+  <div class="card tri center" id="tri1"><div class="bar">First Trimester</div><div id="t1"></div></div>
+  <div class="card tri center" id="tri2"><div class="bar">Second Trimester</div><div id="t2"></div></div>
+  <div class="card tri center" id="tri3"><div class="bar">Third Trimester</div><div id="t3"></div></div>
+</div>
+
+<!-- ANTI D -->
+<div class="card">
+  <div class="bar-line">
+    <div class="bar">Anti-D Prophylaxis (If Rh Negative)</div>
+    <div class="range">28 Weeks</div>
+  </div>
+  <div id="antiD"></div>
+</div>
+
+<!-- GBS -->
+<div class="card">
+  <div class="bar-line">
+    <div class="bar">Group B Streptococcus Screening</div>
+    <div class="range">35–37 Weeks</div>
+  </div>
+  <div id="gbs"></div>
+</div>
+
+</div>
+
+<script>
+// PWA SW
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+
+const today = new Date();
+const todayStr = today.toISOString().split("T")[0];
+
+lmp.max = todayStr;
+gaDate.max = todayStr;
+
+function setToday(){
+  gaDate.value = todayStr;
+  updateAll();
+}
+
+function formatDate(d){
+  const day = d.toLocaleDateString('en-US',{weekday:'long'});
+  const date = d.toDateString().substring(4);
+  return `<div class="day">${day}</div><div class="date">${date}</div>`;
+}
+
+function formatGA(w,d){
+  let p=[];
+  if(w>0) p.push(w===1?"1 Week":`${w} Weeks`);
+  if(d>0) p.push(d===1?"1 Day":`${d} Days`);
+  return p.join(" ");
+}
+
+function updateAll(){
+
+  if(!lmp.value) return;
+
+  let lmpDate = new Date(lmp.value);
+
+  if(lmpDate > today){
+    lmp.value="";
+    return;
+  }
+
+  let refDate = gaDate.value ? new Date(gaDate.value) : today;
+
+  if(refDate < lmpDate){
+    gaDate.value = lmp.value;
+    refDate = lmpDate;
+  }
+
+  const days = Math.floor((refDate - lmpDate)/86400000);
+
+  const w = Math.floor(days/7);
+  const d = days%7;
+
+  ga.innerText = formatGA(w,d) || "0 Days";
+  dayCount.innerText = `Day ${days} / 280`;
+
+  const eddDate = new Date(lmpDate);
+  eddDate.setDate(eddDate.getDate()+280);
+  edd.value = eddDate.toISOString().split("T")[0];
+
+  tri1.classList.remove("active");
+  tri2.classList.remove("active");
+  tri3.classList.remove("active");
+
+  if(days<84) tri1.classList.add("active");
+  else if(days<189) tri2.classList.add("active");
+  else tri3.classList.add("active");
+
+  const t1Date = new Date(lmpDate); t1Date.setDate(t1Date.getDate()+84);
+  const t2Date = new Date(lmpDate); t2Date.setDate(t2Date.getDate()+189);
+
+  t1.innerHTML = formatDate(t1Date);
+  t2.innerHTML = formatDate(t2Date);
+  t3.innerHTML = formatDate(eddDate);
+
+  const anti = new Date(lmpDate); anti.setDate(anti.getDate()+196);
+  antiD.innerHTML = formatDate(anti);
+
+  const g = new Date(lmpDate); g.setDate(g.getDate()+252);
+  gbs.innerHTML = formatDate(g);
+}
+
+lmp.onchange = updateAll;
+gaDate.onchange = updateAll;
+
+edd.onchange = ()=>{
+  if(!edd.value) return;
+
+  const eddDate = new Date(edd.value);
+  const l = new Date(eddDate);
+  l.setDate(l.getDate()-280);
+
+  if(l > today) return;
+
+  lmp.value = l.toISOString().split("T")[0];
+  updateAll();
+};
+</script>
+
+</body>
+</html>
