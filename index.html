@@ -199,6 +199,18 @@ input{
     <b>About</b><br><br>
     ©SGCC OFFICIAL
   </div>
+
+<div class="menu-item" onclick="toggleApps()" style="display:flex; justify-content:space-between; align-items:center;">
+  <span>Other Apps</span>
+  <span id="appsArrow">▾</span>
+</div>
+
+<div id="appsList" style="display:none; margin-top:10px;">
+  <div class="menu-item" onclick="menu.classList.remove('open'); goBMI()">
+    BMI Calculator
+  </div>
+</div>
+  
 </div>
 
 <div class="container">
@@ -277,6 +289,16 @@ function toggleDarkMode(){
 
 updateIcon();
 
+//Menu Update
+function toggleApps(){
+  let list = document.getElementById("appsList");
+  list.style.display = (list.style.display === "none") ? "block" : "none";
+}
+
+function goBMI(){
+  window.location.href = "bmicalc.html";
+}
+  
 // PWA
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
